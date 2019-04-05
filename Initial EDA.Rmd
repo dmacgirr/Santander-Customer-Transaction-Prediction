@@ -1,0 +1,82 @@
+---
+title: "Initial EDA"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Here are the packages needed for this file
+
+```{r Packages}
+
+library(data.table)
+library(corrplot)
+library(tidyverse)
+
+```
+
+Now to load the data
+
+```{r Load Data}
+
+train <- fread("train.csv")
+test <- fread("test.csv")
+
+```
+
+Let's look at the training data first
+
+```{r Training Data}
+
+head(train)
+str(train)
+summary(train)
+sum(is.na(train))
+# there are no null values
+
+```
+
+And now let's look at the Test data
+
+```{r Test Data}
+
+head(test)
+str(test)
+summary(test)
+sum(is.na(test))
+# there are no null values
+
+```
+
+Now let's look at the Target Variable
+
+```{r Target Variable}
+
+hist(train$target)
+#looks like the data is quite imbalanced
+
+target <- train$target
+table(target)
+target_df <- data.frame(table(target))
+plot(target_df)
+pie(table(target))
+
+```
+
+Now let's take a look at the Independent variables and see whether there are any correlations
+
+```{r Load Data}
+
+train$ID_code <- NULL
+traincor <- cor(train)
+traincorplot <- corrplot(traincor, 
+                         type="lower", 
+                         order = "hclust", 
+                         tl.col = "white", 
+                         tl.srt=45)
+
+
+```
+Looks to be about as un-correlated as is possible to be
