@@ -1,0 +1,102 @@
+---
+title: "Kaggle ANOVA"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Let's start by loading the necessary libraries and data files
+
+```{r}
+
+library(data.table)
+library(rcompanion)
+library(MASS)
+library(leaps)
+
+
+train <- fread("train.csv")
+test <- fread("test.csv")
+
+```
+
+Some quick transformation of the train file.
+
+```{r}
+trainx <- train
+trainx$ID_code <- NULL
+
+```
+
+Now let's split the training file by target variable response and do some quick analysis on it
+
+```{r}
+trainxyes <- subset(trainx, target==1)
+trainxno <- subset(trainx, target==0)
+
+kruskal.test(trainxyes)
+kruskal.test(trainxno)
+kruskal.test(trainx)
+
+bartlett.test(trainx, target)
+fligner.test(trainx, target)
+
+
+```
+
+And now let's generate a linear model and see what that looks like
+
+```{r}
+fulllm <- glm(target~., data = trainx, family = "binomial")
+fullanova <- anova(fulllm)
+fullres <- residuals(fulllm)
+plotNormalDensity(fullres)
+plotNormalHistogram(fullres)
+plotDensityHistogram(fullres)
+```
+
+
+Interesting. Now let's run a forward selection algorithm to see which variables have positive predictive value.
+
+As we can see from the output below, 
+
+```{r}
+nulllm <- glm(target~1, data = trainx)
+start_time <- Sys.time()
+stepF <- stepAIC(nulllm, scope = list(lower=nulllm, upper=fulllm), direction = "forward", trace = TRUE)
+
+cat(paste("Time Taken for stepAIC:", Sys.time()-start_time))
+
+```
+
+And now let's run the model against the training set to see how well it performs on CrossTable
+
+```{r}
+testprediction <- predict(stepF, train)
+
+CrossTable(x=target, y=testprediction, prop.chisq=FALSE)
+
+```
+
+And now let's run that on the test set to see how well it scores on Kaggle
+
+```{r}
+
+test$target <- predict(stepF, test)
+
+test <- test[,-(2:201)]
+
+str(test)
+
+write.csv(test, file="stepFsubmission.csv", row.names=F)
+
+```
+
+
+
+
+

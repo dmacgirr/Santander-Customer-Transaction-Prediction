@@ -1,0 +1,78 @@
+---
+title: "Sampling for Training"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Let's start by loading the necessary libraries and data files
+
+```{r}
+
+library(data.table)
+library(rcompanion)
+library(rpart)
+library(rpart.plot)
+
+
+train <- fread("train.csv")
+test <- fread("test.csv")
+
+```
+
+Let's start by splitting the training set into two sets based on the target variable options 1 and 0
+
+```{r}
+subsetyes <- train[which(train$target == 1), ]
+subsetno <- train[which(train$target == 0), ]
+
+```
+
+Now let's split the training file by target variable response and do some quick analysis on it
+
+```{r}
+sampleyes <- sample_n(subsetyes, 10000)
+sampleno1 <- sample_n(subsetno, 10000)
+sampleno2 <- sample_n(subsetno, 20000)
+sampleno3 <- sample_n(subsetno, 30000)
+sampleno4 <- sample_n(subsetno, 40000)
+
+train1 <- rbind(sampleyes, sampleno1)
+train2 <- rbind(sampleyes, sampleno2)
+train3 <- rbind(sampleyes, sampleno3)
+train4 <- rbind(sampleyes, sampleno4)
+
+```
+
+Now let's use rpart to generate some decision trees to see how the various balances impact the model's ability to handle the data
+
+```{r}
+tree1 <- rpart(target ~ ., data = train1[,-1], method = "anova")
+tree1plot <- rpart.plot(tree1, roundint = FALSE)
+
+tree2 <- rpart(target ~ ., data = train2[,-1], method = "anova")
+tree2plot <- rpart.plot(tree2, roundint = FALSE)
+
+tree3 <- rpart(target ~ ., data = train3[,-1], method = "anova")
+tree3plot <- rpart.plot(tree3, roundint = FALSE)
+
+tree4 <- rpart(target ~ ., data = train4[,-1], method = "anova")
+tree4plot <- rpart.plot(tree4, roundint = FALSE)
+
+```
+
+
+
+
+```{r}
+test$target <- predict(tree1, test)
+submission <- test[,-(2:201)]
+str(submission)
+fwrite(submission, file="rpart.csv", row.names=F)
+```
+
+```{r}
+getwd()
+```

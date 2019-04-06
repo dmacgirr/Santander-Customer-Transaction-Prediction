@@ -1,0 +1,118 @@
+---
+title: "XG Boost"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r Packages}
+
+library(data.table)
+library(caret)
+library(doParallel)
+library(mlr)
+library(xgboost)
+
+```
+
+Now let's load the data
+
+```{r Data Load}
+
+train <- fread("train.csv")
+test <- fread("test.csv")
+
+```
+
+And now just a couple changes to the training set to prep for the model
+
+```{r}
+
+target <- train$target
+trainx <- train
+trainx$ID_code <- NULL
+trainx$target <- NULL
+testx <- test
+testx$ID_code <- NULL
+
+```
+
+XG Boost requires a specific matrix file, so let's get that set up
+
+```{r}
+dtrain <- xgb.DMatrix(data = as.matrix(trainx), label = as.matrix(target))
+```
+
+XG Boost uses a number of parameters that must be entered as a list. Best practice appears to be to set up a variable to set those parameters. This makes it much easier to tune the parameters in order to get the best performance from the model by adjusting the size and number of trees our model will use, and the learning rate
+
+```{r}
+params <- list(booster = "gbtree",
+               objective = "binary:logistic",
+               eta=0.01,
+               max_depth=2,
+               min_child_weight=1, 
+               subsample=0.5,
+               colsample_bytree=0.1,
+               scale_pos_weight = round(sum(!target) / sum(target), 2))
+
+```
+
+And now let's run the cross validation. This will be used to train our model
+
+```{r}
+set.seed(2019)
+xgbcv <- xgb.cv(params = params, 
+                data = dtrain,
+                nrounds = 30000, 
+                nfold = 5,
+                showsd = F, 
+                stratified = T, 
+                print_every_n = 100, 
+                early_stopping_rounds = 500, 
+                maximize = T,
+                metrics = "auc")
+
+cat(paste("Best iteration:", xgbcv$best_iteration))
+
+```
+
+And now to actually train the model!
+
+```{r}
+
+set.seed(2019)
+xgb_model <- xgb.train(
+  params = params, 
+  data = dtrain, 
+  nrounds = xgbcv$best_iteration, 
+  print_every_n = 100, 
+  maximize = T,
+  eval_metric = "auc")
+
+str(xgb_model)
+
+```
+
+One of the things I've tried to do with this project is to identify which variables are the important ones. XG Boost makes it really easy to extract a subset of the best variables. Let's check that out.
+
+```{r}
+
+best_feats <- xgb.importance(feature_names = colnames(trainx), model = xgb_model)
+xgb.plot.importance(importance_matrix = best_feats[1:75])
+
+```
+
+Just as we saw with the decision tree, var_81 definitely offers the greatest predictive value. I think it's worth noting just how little predictive value each variable adds to the overall model, but that they are all some positive value. 
+
+
+```{r}
+
+test$target <- predict(xgb_model, newdata=as.matrix(testx), type="response")
+submission <- test[,-(2:201)]
+write.csv(submission, file="submissionxgb.csv", row.names=F)
+
+```

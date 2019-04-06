@@ -1,0 +1,124 @@
+---
+title: "Density Plots"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load the necessary Packages
+
+```{r Packages}
+
+library(tidyverse) # metapackage with lots of helpful functions
+library(data.table)
+library(useful)
+
+```
+
+Load the Data. For this we just need the training data
+
+```{r Data}
+
+train <- fread("train.csv")
+
+```
+
+And now let's look at some Density Plots!
+
+```{r Data}
+
+feature_groups <- 3:22
+
+col_names <- colnames(train)[c(2, feature_groups)]
+temp <- gather(train[, col_names, with = F], key = "features", value = "value", -target)
+temp$target <- factor(temp$target)
+temp$features <- factor(temp$features, levels=col_names[-1], labels=col_names[-1])
+ggplot(data=temp, aes(x=value)) +
+  geom_density(aes(fill=target, color=target), alpha=0.3) +
+  scale_color_manual(values = c("1" = "dodgerblue", "0"="firebrick1")) +
+  facet_wrap(~ features, ncol = 4, scales = "free")
+
+col_names <- colnames(train)[c(2, feature_groups+20)]
+temp <- gather(train[, col_names, with = F], key = "features", value = "value", -target)
+temp$target <- factor(temp$target)
+temp$features <- factor(temp$features, levels=col_names[-1], labels=col_names[-1])
+ggplot(data=temp, aes(x=value)) +
+  geom_density(aes(fill=target, color=target), alpha=0.3) +
+  scale_color_manual(values = c("1" = "dodgerblue", "0"="firebrick1")) +
+  facet_wrap(~ features, ncol = 4, scales = "free")
+
+col_names <- colnames(train)[c(2, feature_groups+40)]
+temp <- gather(train[, col_names, with = F], key = "features", value = "value", -target)
+temp$target <- factor(temp$target)
+temp$features <- factor(temp$features, levels=col_names[-1], labels=col_names[-1])
+ggplot(data=temp, aes(x=value)) +
+  geom_density(aes(fill=target, color=target), alpha=0.3) +
+  scale_color_manual(values = c("1" = "dodgerblue", "0"="firebrick1")) +
+  facet_wrap(~ features, ncol = 4, scales = "free")
+
+col_names <- colnames(train)[c(2, feature_groups+60)]
+temp <- gather(train[, col_names, with = F], key = "features", value = "value", -target)
+temp$target <- factor(temp$target)
+temp$features <- factor(temp$features, levels=col_names[-1], labels=col_names[-1])
+ggplot(data=temp, aes(x=value)) +
+  geom_density(aes(fill=target, color=target), alpha=0.3) +
+  scale_color_manual(values = c("1" = "dodgerblue", "0"="firebrick1")) +
+  facet_wrap(~ features, ncol = 4, scales = "free")
+
+col_names <- colnames(train)[c(2, feature_groups+80)]
+temp <- gather(train[, col_names, with = F], key = "features", value = "value", -target)
+temp$target <- factor(temp$target)
+temp$features <- factor(temp$features, levels=col_names[-1], labels=col_names[-1])
+ggplot(data=temp, aes(x=value)) +
+  geom_density(aes(fill=target, color=target), alpha=0.3) +
+  scale_color_manual(values = c("1" = "dodgerblue", "0"="firebrick1")) +
+  facet_wrap(~ features, ncol = 4, scales = "free")
+
+col_names <- colnames(train)[c(2, feature_groups+100)]
+temp <- gather(train[, col_names, with = F], key = "features", value = "value", -target)
+temp$target <- factor(temp$target)
+temp$features <- factor(temp$features, levels=col_names[-1], labels=col_names[-1])
+ggplot(data=temp, aes(x=value)) +
+  geom_density(aes(fill=target, color=target), alpha=0.3) +
+  scale_color_manual(values = c("1" = "dodgerblue", "0"="firebrick1")) +
+  facet_wrap(~ features, ncol = 4, scales = "free")
+
+col_names <- colnames(train)[c(2, feature_groups+120)]
+temp <- gather(train[, col_names, with = F], key = "features", value = "value", -target)
+temp$target <- factor(temp$target)
+temp$features <- factor(temp$features, levels=col_names[-1], labels=col_names[-1])
+ggplot(data=temp, aes(x=value)) +
+  geom_density(aes(fill=target, color=target), alpha=0.3) +
+  scale_color_manual(values = c("1" = "dodgerblue", "0"="firebrick1")) +
+  facet_wrap(~ features, ncol = 4, scales = "free")
+
+col_names <- colnames(train)[c(2, feature_groups+140)]
+temp <- gather(train[, col_names, with = F], key = "features", value = "value", -target)
+temp$target <- factor(temp$target)
+temp$features <- factor(temp$features, levels=col_names[-1], labels=col_names[-1])
+ggplot(data=temp, aes(x=value)) +
+  geom_density(aes(fill=target, color=target), alpha=0.3) +
+  scale_color_manual(values = c("1" = "dodgerblue", "0"="firebrick1")) +
+  facet_wrap(~ features, ncol = 4, scales = "free")
+
+col_names <- colnames(train)[c(2, feature_groups+160)]
+temp <- gather(train[, col_names, with = F], key = "features", value = "value", -target)
+temp$target <- factor(temp$target)
+temp$features <- factor(temp$features, levels=col_names[-1], labels=col_names[-1])
+ggplot(data=temp, aes(x=value)) +
+  geom_density(aes(fill=target, color=target), alpha=0.3) +
+  scale_color_manual(values = c("1" = "dodgerblue", "0"="firebrick1")) +
+  facet_wrap(~ features, ncol = 4, scales = "free")
+
+col_names <- colnames(train)[c(2, feature_groups+180)]
+temp <- gather(train[, col_names, with = F], key = "features", value = "value", -target)
+temp$target <- factor(temp$target)
+temp$features <- factor(temp$features, levels=col_names[-1], labels=col_names[-1])
+ggplot(data=temp, aes(x=value)) +
+  geom_density(aes(fill=target, color=target), alpha=0.3) +
+  scale_color_manual(values = c("1" = "dodgerblue", "0"="firebrick1")) +
+  facet_wrap(~ features, ncol = 4, scales = "free")
+
+```

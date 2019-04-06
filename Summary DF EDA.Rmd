@@ -1,0 +1,101 @@
+---
+title: "Summary DF EDA"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+IN this file we will run the summary function from the Hmisc package and turn that output into a dataframe, which we can then run some further EDA on.
+
+```{r Load Packages}
+
+library(data.table)
+library(tidyverse)
+library(Hmisc)
+
+```
+
+First we load the data
+
+```{r Load Data}
+train <- fread("train.csv")
+test <- fread("test.csv")
+```
+
+And now we use the summary function from the Hmsic and turn that output into a dataframe
+
+```{r Create the Dataframe}
+df <- sapply(train[,-1], summary)
+df <- as.data.frame(t(df))
+head(df)
+unique <- as.vector(lengths(lapply(train[,-1], unique)))
+df$unique <- unique
+varname <- colnames(train[,-1])
+df <- cbind(varname, df)
+head(df)
+str(df)
+```
+
+Some of those feature names are going to give us issues, so let's go ahead and rename them
+
+
+```{r Load Data}
+
+colnames(df)[2] <- "min"
+colnames(df)[3] <- "Q1"
+colnames(df)[6] <- "Q3"
+colnames(df)[7] <- "max"
+head(df)
+summary(df[,-1])
+
+```
+
+And now let's see what it looks like
+
+```{r Load Data}
+hist(df[,-1])
+```
+
+Interesting. Let's get a little more resolution on those plots
+```{r Load Data}
+dmin <- density(df$min)
+dQ1 <- density(df$Q1)
+dmed <- density(df$Median)
+dmean <- density(df$Mean)
+dQ3 <- density(df$Q3)
+dmax <- density(df$max)
+dunique <- density(df$unique)
+plot(dmin)
+plot(dQ1)
+plot(dmed)
+plot(dmean)
+plot(dQ3)
+plot(dmax)
+plot(dunique)
+```
+
+Is that last table telling me that there are a negative number of unique values for one of the variables?
+```{r Load Data}
+head(sort(df$unique))
+tail(sort(df$unique))
+```
+
+Nope, we're good. That is quite an impressive range though.
+
+Now let's use ggplot to put those density plots into a bit more compact presentation
+
+```{r Load Data}
+col_names <- colnames(df[,-1])
+temp <- gather(df[,col_names], key="features", value="value")
+temp$features <- factor(temp$features, levels=col_names, labels=col_names)
+ggplot(data=temp, aes(x=value)) + 
+    geom_density(aes(x=value), alpha=0.3) +
+    facet_wrap(~ features, ncol = 2, scales = "free")
+```
+
+
+
+
+

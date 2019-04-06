@@ -1,0 +1,106 @@
+---
+title: "GLM with fewer stepAIC Var's removed"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load the necessary Packages
+
+```{r Packages}
+
+library(tidyverse) # metapackage with lots of helpful functions
+library(data.table)
+library(useful)
+library(rcompanion)
+
+```
+
+Load the Data.
+
+```{r Data}
+train <- fread("train.csv")
+test <- fread("test.csv")
+```
+
+Let's prep the dataset for the model and remove the variables that stepAIC didn't take into account 
+
+```{r Data}
+target <- train$target
+train$ID_code <- NULL
+train$target <- NULL
+train$var_7 <- NULL
+train$var_10 <- NULL
+train$var_17 <- NULL
+train$var_27 <- NULL
+train$var_30 <- NULL
+train$var_38 <- NULL
+train$var_41 <- NULL
+train$var_96 <- NULL
+train$var_100 <- NULL
+train$var_103 <- NULL
+train$var_117 <- NULL
+train$var_126 <- NULL
+train$var_185 <- NULL
+```
+
+And now let's do the same for the test set to make sure they align
+
+```{r Data}
+testx <- test
+
+test$ID_code <- NULL
+test$var_7 <- NULL
+test$var_10 <- NULL
+test$var_17 <- NULL
+test$var_27 <- NULL
+test$var_30 <- NULL
+test$var_38 <- NULL
+test$var_41 <- NULL
+test$var_96 <- NULL
+test$var_100 <- NULL
+test$var_103 <- NULL
+test$var_117 <- NULL
+test$var_126 <- NULL
+test$var_185 <- NULL
+```
+
+And now let's run the linear model and see what that comes up with
+
+```{r Data}
+length(colnames(train))
+length(colnames(test))
+
+head(colnames(train))
+head(colnames(test))
+
+```
+
+And now let's run the linear model and see what that comes up with
+
+```{r Data}
+set.seed(42)
+fulllm <- glm(target~., data = train, family = "binomial")
+```
+
+Let's include the visuals to see how they compare
+
+```{r Data}
+fullanova <- anova(fulllm)
+fullres <- residuals(fulllm)
+plotNormalDensity(fullres)
+plotNormalHistogram(fullres)
+plotDensityHistogram(fullres)
+```
+
+And now let's use that model to make a prediction
+
+```{r Data}
+test$target <- predict(fulllm, interval="prediction", newdata=test)
+submission <- testx[,-(2:187)]
+fwrite(submission, "glmsubmission2.csv")
+```
+
+Kaggle Score: ?
